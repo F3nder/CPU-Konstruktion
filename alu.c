@@ -85,7 +85,7 @@ uint32_t alu(const uint16_t operation,
       {
          result = a + b;
 
-         if ((read(a, 7) == read(b, 7)) && (read(result, 7) != read(a, 7)))
+         if ((read(a, 31) == read(b, 31)) && (read(result, 31) != read(a, 31)))
          {
             set(*sr, V);
          }
@@ -93,9 +93,9 @@ uint32_t alu(const uint16_t operation,
       }
       case SUB:
       {
-         result = a + (pow(2, 32) - b); 
+         result = a + (pow(2, 31) - b); 
 
-         if ((read(a, 7) == read(256 - b, 7)) && (read(result, 7) != read(a, 7)))
+         if ((read(a, 31) == read((pow(2, 31) - b), 31)) && (read(result, 31) != read(a, 31)))
          {
             set(*sr, V);
          }
@@ -103,9 +103,9 @@ uint32_t alu(const uint16_t operation,
       }
    }
 
-   if (read(result, 7) == 1)         set(*sr, N);
-   if ((uint8_t)(result) == 0)       set(*sr, Z);
-   if (read(result, 8) == 1)         set(*sr, C);
+   if (read(result, 31) == 1)         set(*sr, N);
+   if ((uint32_t)(result) == 0)       set(*sr, Z);
+   if (read(result, 32) == 1)         set(*sr, C);
    if (read(*sr, N) != read(*sr, V)) set(*sr, S);
 
    return (uint32_t)(result);
