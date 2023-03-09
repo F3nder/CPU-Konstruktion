@@ -14,7 +14,7 @@
 *      - b        : Second operand.
 *      - sr       : Reference to status register containing SNZVC flags.
 ********************************************************************************/
-uint32_t alu(const uint32_t operation,
+uint32_t alu(const uint16_t operation,
              const uint32_t a,
              const uint32_t b,
              uint8_t* sr);
