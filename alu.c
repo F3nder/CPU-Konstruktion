@@ -55,12 +55,12 @@
 *      - b        : Second operand.
 *      - sr       : Reference to status register containing SNZVC flags.
 ********************************************************************************/
-uint8_t alu(const uint8_t operation,
-            const uint8_t a,
-            const uint8_t b,
+uint32_t alu(const uint16_t operation,
+            const uint32_t a,
+            const uint32_t b,
             uint8_t* sr)
 {
-   uint16_t result = 0x00;
+   uint64_t result = 0x00;
    *sr &= ~((1 << S) | (1 << N) | (1 << Z) | (1 << V) | (1 << C));
 
    switch (operation)
@@ -107,5 +107,5 @@ uint8_t alu(const uint8_t operation,
    if (read(result, 8) == 1)         set(*sr, C);
    if (read(*sr, N) != read(*sr, V)) set(*sr, S);
 
-   return (uint8_t)(result);
+   return (uint32_t)(result);
 }
