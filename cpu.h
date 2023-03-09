@@ -63,14 +63,12 @@
 #define PORTA 0x01 /* Data register for I/O port A. */
 #define PINA  0x02 /* Pin input register for I/O port A. */
 
-#define PCICR 0x03 /* Pin change interrupt control register for all I/O ports. */
-#define PCIFR 0x04 /* Pin change interrupt flag register for all I/O ports. */
+#define ICR 0x03 /* Pin change interrupt control register for all I/O ports. */
+#define IFR 0x04 /* Pin change interrupt flag register for all I/O ports. */
 
-#define PCMSK 0x05 /* Pin change interrupt mask register for I/O port A. */
-
-#define PCIE 0 /* Pin change interrupt enable bit for I/O port A. */
-
-#define PCIF 0 /* Pin change interrupt flag bit for I/O port A. */
+#define PCMSKA 0x05 /* Pin change interrupt mask register for I/O port A. */
+#define PCIEA 0 /* Pin change interrupt enable bit for I/O port A. */
+#define PCIFA 0 /* Pin change interrupt flag bit for I/O port A. */
 
 #define PORTA0 0 /* Bit number for pin 0 at I/O port D. */
 #define PORTA1 1 /* Bit number for pin 1 at I/O port D. */

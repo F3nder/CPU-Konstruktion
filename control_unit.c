@@ -1,8 +1,11 @@
+#include "control_unit.h"
+
 /* Static functions: */
+#if 0
 static void check_for_irq(void);
 static void generate_interrupt(const uint16_t interrupt_vector);
-
 static inline void monitor_pcint(void);
+#endif 
 
 /* Static variables: */
 static uint64_t ir; /* Instruction register, stores next instruction to execute. */
@@ -301,7 +304,7 @@ void control_unit_run_next_state(void)
         }
 
         state = CPU_STATE_FETCH;    /* Fetches next instruction during next clock cycle. */
-        check_for_irq();            /* Checks for interrupt request after each execute cycle. */
+        // check_for_irq();            /* Checks for interrupt request after each execute cycle. */
         break;
     }
     default:                       /* System reset if error occurs. */
@@ -311,7 +314,7 @@ void control_unit_run_next_state(void)
     }
     }
 
-    monitor_interrupts();            /* Monitors interrupts each clock cycle. */
+    // monitor_interrupts();            /* Monitors interrupts each clock cycle. */
     return;
 }
 
@@ -325,16 +328,17 @@ void control_unit_run_next_state(void)
 *                will be generated again and again). A jump is made to the
 *                corresponding interrupt vector, such as PCINT0_vect.
 ********************************************************************************/
+#if 0
 static void check_for_irq(void)
 {
     if (read(sr, I))
     {
-        const uint32_t pcifr = data_memory_read(PCIFR + 256);
-        const uint32_t pcicr = data_memory_read(PCICR + 256);
+        const uint32_t pcifr = data_memory_read(IFR + 256);
+        const uint32_t pcicr = data_memory_read(ICR + 256);
 
         if (read(pcifr, PCIF0) && read(pcicr, PCIE0))
         {
-            data_memory_clear_bit(PCIFR + 256, PCIF0);
+            data_memory_clear_bit(IFR + 256, PCIF0);
             generate_interrupt(PCINT0_vect);
         }
         else if (read(pcifr, PCIF1) && read(pcicr, PCIE1))
@@ -396,3 +400,5 @@ static inline void monitor_pcint(void)
     pina_previous = pina_current;
     return;
 }
+
+#endif 

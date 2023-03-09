@@ -16,15 +16,15 @@ void stack_reset(void);
 *             Success code 0 is returned after successful push, otherwise
 *             error code 1 is returned if the stack is already full.
 *
-*             - value: 8 bit value to push to the stack.
+*             - value: 32 bit value to push to the stack.
 ********************************************************************************/
-int stack_push(const uint8_t value);
+int stack_push(const uint32_t value);
 
 /********************************************************************************
-* stack_pop: Returns 8 bit value popped from the stack. If the stack is empty,
+* stack_pop: Returns 32 bit value popped from the stack. If the stack is empty,
 *            the value 0x00 is returned.
 ********************************************************************************/
-uint8_t stack_pop(void);
+uint32_t stack_pop(void);
 
 
 #endif /* STACK_H_ */
