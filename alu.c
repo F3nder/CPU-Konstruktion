@@ -44,6 +44,7 @@
 *            ATmega328P when counting up in Normal Mode.
 ********************************************************************************/
 #include "alu.h"
+#include <math.h>
 
 /********************************************************************************
 * alu: Performs calculation with specified operands and returns the result.
@@ -92,7 +93,7 @@ uint32_t alu(const uint16_t operation,
       }
       case SUB:
       {
-         result = a + (256 - b); /* 256 - b is the 2-complement representation of B. */
+         result = a + (pow(2, 32) - b); 
 
          if ((read(a, 7) == read(256 - b, 7)) && (read(result, 7) != read(a, 7)))
          {
