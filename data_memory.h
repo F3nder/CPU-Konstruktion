@@ -1,4 +1,3 @@
-//jag
 /********************************************************************************
 * data_memory.h: Contains function declarations and macro definitions for
 *                implementation of a 2 kB data memory (2000 x 1 byte).
@@ -36,6 +35,38 @@ int data_memory_write(const uint16_t address,
 *                   - address: Read location in data memory.
 ********************************************************************************/
 uint32_t data_memory_read(const uint16_t address);
+
+/********************************************************************************
+* data_memory_set_bit: Sets bit in specified data memory register. The value 0
+*                      is returned after successful write. Otherwise if an
+*                      invalid address is specified, no write is done and
+*                      error code 1 is returned.
+*
+*                     - address: Write location in data memory.
+*                     - bit    : Bit to set in data memory register.
+********************************************************************************/
+static inline int data_memory_set_bit(const uint16_t address,
+const uint8_t bit)
+{
+	const uint32_t data = data_memory_read(address);
+	return data_memory_write(address, data | (1 << bit));
+}
+
+/********************************************************************************
+* data_memory_clear_bit: Clears bit in specified data memory register. The value
+*                        0 is returned after successful write. Otherwise if
+*                        an invalid address is specified, no write is done and
+*                        error code 1 is returned.
+*
+*                        - address: Write location in data memory.
+*                        - bit    : Bit to clear in data memory register.
+********************************************************************************/
+static inline int data_memory_clear_bit(const uint16_t address,
+const uint8_t bit)
+{
+	const uint32_t data = data_memory_read(address);
+	return data_memory_write(address, data & ~(1 << bit));
+}
 
 
 #endif /* DATA_MEMORY_H_ */
