@@ -176,19 +176,6 @@ enum cpu_state
 	CPU_STATE_DECODE, /* Decodes the fetched instruction. */
 	CPU_STATE_EXECUTE /* Executes the decoded instruction. */
 };
-//jag
-/********************************************************************************
-* cpu_instruction_name: Returns the name of specified instruction.
-*
-*                       - instruction: The specified CPU instruction.
-********************************************************************************/
-const char* cpu_instruction_name(const uint8_t instruction);
 
-/********************************************************************************
-* cpu_state_name: Returns the name of specified CPU state.
-*
-*                 - state: The specified CPU state.
-********************************************************************************/
-const char* cpu_state_name(const enum cpu_state state);
 
 #endif /* CPU_H_ */
