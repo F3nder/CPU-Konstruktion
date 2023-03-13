@@ -7,6 +7,7 @@
 
 /* Include directives: */
 #include <stdio.h>
+#include <avr/io.h>
 #include <stdlib.h>
 #include <stdint.h>
 #include <stdbool.h>
@@ -176,6 +177,5 @@ enum cpu_state
 	CPU_STATE_DECODE, /* Decodes the fetched instruction. */
 	CPU_STATE_EXECUTE /* Executes the decoded instruction. */
 };
-
 
 #endif /* CPU_H_ */

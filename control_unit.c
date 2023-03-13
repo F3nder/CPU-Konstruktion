@@ -1,11 +1,11 @@
 #include "control_unit.h"
 
 /* Static functions: */
-#if 0
+static void monitor_interrupts(void);
 static void check_for_irq(void);
 static void generate_interrupt(const uint16_t interrupt_vector);
 static inline void monitor_pcint(void);
-#endif 
+
 
 /* Static variables: */
 static uint64_t ir; /* Instruction register, stores next instruction to execute. */
@@ -107,12 +107,12 @@ void control_unit_run_next_state(void)
         }
         case STS: /* Stores value to data memory (address 256 - 511, hence an offset of 256). */
         {
-            data_memory_write(op1 + 256, reg[op2]);
+            data_memory_write(op1, reg[op2]);
             break;
         }
         case LDS: /* Loads value from data memory (address 256 - 511, hence an offset of 256). */
         {
-            reg[op1] = data_memory_read(op2 + 256);
+            reg[op1] = data_memory_read(op2);
             break;
         }
         case CLR: /* Clears content of CPU register. */
@@ -272,30 +272,30 @@ void control_unit_run_next_state(void)
             clr(sr, I);
             break;
         }
-        //case STIO:  /* Stores value to referenced I/O location (no offset). */
-        //{
-        //    const uint16_t address = reg[op1] | (reg[op1 + 1] << 8);
-        //    data_memory_write(address, reg[op2]);
-        //    break;
-        //}
-        //case LDIO: /* Loads value from referenced I/O location (no offset). */
-        //{
-        //    const uint16_t address = reg[op2] | (reg[op2 + 1] << 8);
-        //    reg[op1] = data_memory_read(address);
-        //    break;
-        //}
-        //case ST: /* Stores value to referenced data location (offset = 256). */
-        //{
-        //    const uint16_t address = reg[op1] | (reg[op1 + 1] << 8);
-        //    data_memory_write(address + 256, reg[op2]);
-        //    break;
-        //}
-        //case LD: /* Loads value from referenced data location (offset = 256). */
-        //{
-        //    const uint16_t address = reg[op2] | (reg[op2 + 1] << 8);
-        //    reg[op1] = data_memory_read(address + 256);
-        //    break;
-        //}
+        case STIO:  /* Stores value to referenced I/O location (no offset). */
+        {
+            const uint16_t address = reg[op1] | (reg[op1 + 1] << 8);
+            data_memory_write(address, reg[op2]);
+            break;
+        }
+        case LDIO: /* Loads value from referenced I/O location (no offset). */
+        {
+            const uint16_t address = reg[op2] | (reg[op2 + 1] << 8);
+            reg[op1] = data_memory_read(address);
+            break;
+        }
+        case ST: /* Stores value to referenced data location (offset = 256). */
+        {
+            const uint16_t address = reg[op1] | (reg[op1 + 1] << 8);
+            data_memory_write(address, reg[op2]);
+            break;
+        }
+        case LD: /* Loads value from referenced data location (offset = 256). */
+        {
+            const uint16_t address = reg[op2] | (reg[op2 + 1] << 8);
+            reg[op1] = data_memory_read(address);
+            break;
+        }
         default:
         {
             control_unit_reset(); /* System reset if error occurs. */
@@ -304,7 +304,7 @@ void control_unit_run_next_state(void)
         }
 
         state = CPU_STATE_FETCH;    /* Fetches next instruction during next clock cycle. */
-        // check_for_irq();            /* Checks for interrupt request after each execute cycle. */
+        check_for_irq();            /* Checks for interrupt request after each execute cycle. */
         break;
     }
     default:                       /* System reset if error occurs. */
@@ -314,8 +314,14 @@ void control_unit_run_next_state(void)
     }
     }
 
-    // monitor_interrupts();            /* Monitors interrupts each clock cycle. */
+    monitor_interrupts();            /* Monitors interrupts each clock cycle. */
     return;
+}
+
+static void monitor_interrupts(void)
+{
+	monitor_pcint();
+	return;
 }
 
 /********************************************************************************
@@ -328,28 +334,18 @@ void control_unit_run_next_state(void)
 *                will be generated again and again). A jump is made to the
 *                corresponding interrupt vector, such as PCINT0_vect.
 ********************************************************************************/
-#if 0
+
 static void check_for_irq(void)
 {
     if (read(sr, I))
     {
-        const uint32_t pcifr = data_memory_read(IFR + 256);
-        const uint32_t pcicr = data_memory_read(ICR + 256);
+        const uint32_t pcifr = data_memory_read(IFR);
+        const uint32_t pcicr = data_memory_read(ICR);
 
         if (read(pcifr, PCIF0) && read(pcicr, PCIE0))
         {
-            data_memory_clear_bit(IFR + 256, PCIF0);
-            generate_interrupt(PCINT0_vect);
-        }
-        else if (read(pcifr, PCIF1) && read(pcicr, PCIE1))
-        {
-            data_memory_clear_bit(PCIFR + 256, PCIF1);
-            generate_interrupt(PCINT1_vect);
-        }
-        else if (read(pcifr, PCIF2) && read(pcicr, PCIE2))
-        {
-            data_memory_clear_bit(PCIFR + 256, PCIF2);
-            generate_interrupt(PCINT2_vect);
+            data_memory_clear_bit(IFR, PCIF0);
+            generate_interrupt(PCINT_vect);
         }
     }
     return;
@@ -383,9 +379,9 @@ static void generate_interrupt(const uint16_t interrupt_vector)
 static inline void monitor_pcint(void)
 {
     const uint32_t pina_current = data_memory_read(PINA);
-    const uint32_t pcmsk = data_memory_read(PCMSK + 256);
+    const uint32_t pcmsk = data_memory_read(PCMSKA);
 
-    for (uint32_t i = 0; i < DATA_MEMORY_DATA_WIDTH; ++i)
+    for (uint32_t i = 0; i < CPU_REGISTER_DATA_WIDTH; ++i)
     {
         if (read(pcmsk, i))
         {
@@ -400,5 +396,3 @@ static inline void monitor_pcint(void)
     pina_previous = pina_current;
     return;
 }
-
-#endif 

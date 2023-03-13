@@ -26,7 +26,7 @@ void data_memory_reset(void);
 *                    - value  : The 8-bit value to write to data memory.
 ********************************************************************************/
 int data_memory_write(const uint16_t address,
-                      const uint32_t value);
+const uint32_t value);
 
 /********************************************************************************
 * data_memory_read: Returns content from specified read location in data memory.
