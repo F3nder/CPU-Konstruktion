@@ -5,6 +5,9 @@ static void monitor_interrupts(void);
 static void check_for_irq(void);
 static void generate_interrupt(const uint16_t interrupt_vector);
 static inline void monitor_pcint(void);
+static void control_unit_io_reset(void);
+static void control_unit_io_update(void);
+static inline void return_from_interrupt(void);
 
 
 /* Static variables: */
@@ -51,6 +54,7 @@ void control_unit_reset(void)
     data_memory_reset();
     stack_reset();
     program_memory_write();
+	control_unit_io_reset();
     return;
 }
 
@@ -314,8 +318,50 @@ void control_unit_run_next_state(void)
     }
     }
 
+    control_unit_io_update();
     monitor_interrupts();            /* Monitors interrupts each clock cycle. */
     return;
+}
+
+static void control_unit_io_reset(void)
+{
+	
+	DDRB = 0;
+	DDRC = 0;
+	DDRD = 0;
+	
+    PORTB = 0;
+	PORTC = 0;
+	PORTD = 0;
+	return;
+}
+static void control_unit_io_update(void)
+{
+	const uint32_t ddra = data_memory_read(DDRA);
+	const uint32_t porta = data_memory_read(PORTA);
+	const uint32_t pina = data_memory_read(PIND) | (data_memory_read(PINB) << 8) 
+	                   | (data_memory_read(PINC) << 16);
+	
+	data_memory_write(PINA, pina);
+	
+	DDRB = (uint8_t)(ddra >> 8);
+	DDRC = (uint8_t)(ddra >> 16);
+	DDRD = (uint8_t)(ddra);
+	
+	PORTB = (uint8_t)(porta >> 8);
+	PORTC = (uint8_t)(porta >> 16);
+	PORTD = (uint8_t)(porta);
+	return;
+	
+}
+
+static inline void cpu_registers_clear(void)
+{
+	for (uint32_t* i = reg; i < reg + CPU_REGISTER_ADDRESS_WIDTH; ++i)
+	{
+		*i = 0x00;
+	}
+	return;
 }
 
 static void monitor_interrupts(void)
@@ -395,4 +441,11 @@ static inline void monitor_pcint(void)
 
     pina_previous = pina_current;
     return;
+}
+
+static inline void return_from_interrupt(void)
+{
+	pc = stack_pop();
+	set(sr, I);
+	return;
 }
