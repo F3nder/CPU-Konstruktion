@@ -1,4 +1,5 @@
 # CPU-Konstruktion
+Av Linus Oskarsson, Rebecka Bergman, Oscar Svensson & Nelly Hellsing
 
 1. Vad lärde ni er av projektet?
    
