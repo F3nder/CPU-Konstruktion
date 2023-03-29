@@ -17,7 +17,7 @@ static uint32_t mar;
 
 static uint8_t sr;  /* Status register, stores status bits ISNZVC. */
 
-static uint16_t op_code; /* Stores OP-code, for example LDI, OUT, JMP etc. */
+static volatile uint16_t op_code; /* Stores OP-code, for example LDI, OUT, JMP etc. */
 static uint16_t op1;     /* Stores first operand, most often a destination. */
 static uint32_t op2;     /* Stores second operand, most often a value or read address. */
 
@@ -75,8 +75,8 @@ void control_unit_run_next_state(void)
     }
     case CPU_STATE_DECODE:
     {
-        op_code = ir >> 16;           /* Bit 23 downto 16 consists of the OP code. */
-        op1 = ir >> 8;                /* Bit 15 downto 8 consists of the first operand. */
+        op_code = ir >> 48;           /* Bit 23 downto 16 consists of the OP code. */
+        op1 = ir >> 32;                /* Bit 15 downto 8 consists of the first operand. */
         op2 = ir;                     /* Bit 7 downto 0 consists of the second operand. */
         state = CPU_STATE_EXECUTE;    /* Executes the instruction during next clock cycle. */
         break;
@@ -101,7 +101,15 @@ void control_unit_run_next_state(void)
         }
         case OUT: /* Writes value to I/O location (address 0 - 255) in data memory. */
         {
-            data_memory_write(op1, reg[op2]);
+            if (op1 == PINA)
+			{
+				const uint32_t data = data_memory_read(PORTA);
+				data_memory_write(PORTA, data ^ reg[op2]);
+			}
+			else
+			{
+				data_memory_write(op1, reg[op2]);
+			}
             break;
         }
         case IN: /* Reads value from I/O location (address 0 - 255) in data memory. */
@@ -339,8 +347,7 @@ static void control_unit_io_update(void)
 {
 	const uint32_t ddra = data_memory_read(DDRA);
 	const uint32_t porta = data_memory_read(PORTA);
-	const uint32_t pina = data_memory_read(PIND) | (data_memory_read(PINB) << 8) 
-	                   | (data_memory_read(PINC) << 16);
+	const uint32_t pina = PIND | ((uint32_t)(PINB) << 8) | ((uint32_t)(PINC) << 16);
 	
 	data_memory_write(PINA, pina);
 	
@@ -388,9 +395,9 @@ static void check_for_irq(void)
         const uint32_t pcifr = data_memory_read(IFR);
         const uint32_t pcicr = data_memory_read(ICR);
 
-        if (read(pcifr, PCIF0) && read(pcicr, PCIE0))
+        if (read(pcifr, PCIFA) && read(pcicr, PCIEA))
         {
-            data_memory_clear_bit(IFR, PCIF0);
+            data_memory_clear_bit(IFR, PCIFA);
             generate_interrupt(PCINT_vect);
         }
     }
@@ -433,7 +440,7 @@ static inline void monitor_pcint(void)
         {
             if (read(pina_current, i) != read(pina_previous, i))
             {
-                data_memory_set_bit(PCIFR + 256, PCIF0);
+                data_memory_set_bit(IFR, PCIF0);
                 break;
             }
         }

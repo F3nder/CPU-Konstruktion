@@ -36,6 +36,7 @@ void program_memory_write(void)
 
 	 program_memory[4]  = join(CALL, setup, 0x00);
 	 program_memory[5]  = join(JMP, main_loop, 0x00);
+	 
 	 program_memory[6]  = join(LDI, R16, (1 << LED1));
 	 program_memory[7]  = join(OUT, DDRA, R16);
 	 program_memory[8]  = join(LDI, R17, (1 << BUTTON1));

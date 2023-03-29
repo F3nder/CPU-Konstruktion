@@ -46,7 +46,7 @@ uint32_t data_memory_read(const uint16_t address);
 *                     - bit    : Bit to set in data memory register.
 ********************************************************************************/
 static inline int data_memory_set_bit(const uint16_t address,
-const uint8_t bit)
+                                      const uint32_t bit)
 {
 	const uint32_t data = data_memory_read(address);
 	return data_memory_write(address, data | (1 << bit));
@@ -62,7 +62,7 @@ const uint8_t bit)
 *                        - bit    : Bit to clear in data memory register.
 ********************************************************************************/
 static inline int data_memory_clear_bit(const uint16_t address,
-const uint8_t bit)
+const uint32_t bit)
 {
 	const uint32_t data = data_memory_read(address);
 	return data_memory_write(address, data & ~(1 << bit));
